@@ -13,8 +13,9 @@ class LineItemController extends Controller
      */
     public function index()
     {
-        $user    = auth()->user();
+        $user = auth()->user();
         $lineItems = LineItem::orderBy('id', 'DESC')->get();
+		
         return view('lineItem.index', compact('lineItems'));
     }
 
@@ -62,7 +63,8 @@ class LineItemController extends Controller
      */
     public function update(UpdateLineItemRequest $request, LineItem $lineItem)
     {
-        //
+        $lineItem->update($request->validated());
+		return redirect(route('lineItem.index'));
     }
 
     /**

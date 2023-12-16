@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateLineItemRequest extends FormRequest
+class UpdateInvoiceRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,10 +23,9 @@ class UpdateLineItemRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'        => ['required', 'string', 'max:255'],
-            'description' => ['required', 'string'],
-            'unit_price'  => ['required', 'numeric', 'min:0.01', 'regex:/^\d+(\.\d{1,2})?$/'],
-			'quantity'    => ['required', 'numeric', 'min:1'],
+            'customer_name'      => ['required', 'string', 'max:255'],
+            'customer_email'     => ['required', 'string', 'lowercase', 'email', 'max:255'],
+            'line_items_and_qty' => ['required', 'string', 'max:255'],
         ];
     }
 }

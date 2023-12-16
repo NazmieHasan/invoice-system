@@ -33,4 +33,7 @@
             </main>
         </div>
     </body>
+	<footer class="text-center">
+		<div class="p-4">All Right Reserved</div>
+	</footer>
 </html>

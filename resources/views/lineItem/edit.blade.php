@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100 dark:bg-gray-900">
-        <h1 class="text-white text-lg font-bold">Update line item</h1>
+        <h1 class="text-dark text-lg font-bold">Update line item</h1>
         <div class="w-full sm:max-w-xl mt-6 px-6 py-4 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-lg">
             <form method="POST" action="{{ route('lineItem.update', $lineItem->id) }}">
                 @csrf
@@ -10,12 +10,12 @@
                     <x-input-label for="name" :value="__('Name')" />
                     <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" autofocus
                         value="{{ $lineItem->name }}" />
-                    <x-input-error :messages="$errors->get('title')" class="mt-2" />
+                    <x-input-error :messages="$errors->get('name')" class="mt-2" />
                 </div>
 
                 <div class="mt-4">
                     <x-input-label for="description" :value="__('Description')" />
-                    <x-textarea placeholder="Add description" name="description" id="description"
+                    <x-textarea rows="5" name="description" id="description"
                         value="{{ $lineItem->description }}" />
                     <x-input-error :messages="$errors->get('description')" class="mt-2" />
                 </div>

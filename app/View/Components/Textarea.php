@@ -8,6 +8,8 @@ use Illuminate\View\Component;
 
 class Textarea extends Component
 {
+	public $value = '';
+	
     /**
      * Create a new component instance.
      */

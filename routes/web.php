@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\LineItemController;
+use App\Http\Controllers\InvoiceController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -33,4 +34,8 @@ require __DIR__.'/auth.php';
 
 Route::middleware('auth')->group(function () {
     Route::resource('/lineItem', LineItemController::class);
+});
+
+Route::middleware('auth')->group(function () {
+    Route::resource('/invoice', InvoiceController::class);
 });
