@@ -10,7 +10,7 @@
             @forelse ($lineItems as $lineItem)
                 <div class="text-dark flex justify-between py-4">
                     <a href="{{ route('lineItem.show', $lineItem->id) }}" class="underline">{{ $lineItem->name }}</a>
-                    <p>{{ $lineItem->unit_price }}</p>
+                    <p>{{ $lineItem->unit_price }}$</p>
                 </div>
             @empty
                 <p class="text-white">You don't have any line item yet.</p>

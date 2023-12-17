@@ -1,15 +1,24 @@
 <x-app-layout>
     <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100 dark:bg-gray-900">
-		<h1 class="text-dark text-lg font-bold">Create new invoice</h1>
-        <div class="w-full sm:max-w-xl mt-6 px-6 py-4 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-lg">
+		<h1 class="mt-6 text-dark text-lg font-bold">Create New Invoice</h1>
+        <div class="w-full sm:max-w-xl mt-6 mb-6 px-6 py-4 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-lg">
             <form method="POST" action="{{ route('invoice.store') }}">
                 @csrf
-				
+			
 				@forelse ($lineItems as $lineItem)
+				<?php $j= $lineItem->quantity; ?>
                 <div class="text-dark flex justify-between py-4">
-					<p>
-						<a href="{{ route('lineItem.show', $lineItem->id) }}" class="underline">{{ $lineItem->name }}</a> 
-						({{ $lineItem->unit_price }}$)
+					<p id="{{$lineItem->id}}" class="line_items_and_qty_class">
+						<input type="checkbox" name="lineItem_id_req" class="{{$lineItem->id}}" value="{{$lineItem->id}}" />
+					    {{ $lineItem->name }} ({{ $lineItem->unit_price }}$)
+						<select name="qty_req" class="{{$lineItem->id}}">
+							<option value="" selected="selected">Quantity</option>
+                            @for ($i = 1; $i <= $j; $i++)
+                                <option value="{{$i}}">
+                                    {{$i}}
+								</option>
+							@endfor
+						</select>
 					</p>
                 </div>
                 @empty
@@ -36,11 +45,19 @@
                 </div>
 
                 <div class="flex items-center justify-end mt-4">
-                    <x-primary-button class="ml-3">
+                    <x-primary-button class="ml-3" onclick="checkboxBtnFunc()">
                         Create
                     </x-primary-button>
                 </div>
             </form>
         </div>
     </div>
+	<script>
+	    function checkboxBtnFunc() {
+			var checkboxes = document.querySelectorAll('input:checked');
+            var lineItemIdValues = [...checkboxes].map(checkbox => checkbox.value);
+            console.log(lineItemIdValues);
+		}
+	</script>
+	
 </x-app-layout>
