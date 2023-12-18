@@ -38,29 +38,39 @@ class InvoiceController extends Controller
     {
 		$invoiceNumber = rand(10, 1000);
 		
-		$lineItemsAndQtyFromRequest = $request->line_items_and_qty;
-		$lineItemsAndQtyFromRequestExplode = explode(';', $lineItemsAndQtyFromRequest); 
+		// line item id
+		$lineItemCheckboxArr = $request->input('line_items'); 
+		
+		$arr = [];
+		foreach ($lineItemCheckboxArr as $key => $lineItemId) {
+			$arr[] = $lineItemId; 
+		}
+		
+		// line item default quantity = 1
+		// TODO quantity > 1
+		$lineItemQuantity = 1;
+		$lineItemsAndQtyToDb = "";
+	    $oneLineItemAndQty = implode(':1;', $arr); 
+	    $lineItemsAndQtyToDb .= $oneLineItemAndQty;
+		$lineItemsAndQtyToDb .= ":1";
+
+		$qty = (int)$lineItemQuantity;
 		$sum = 0;
 		$totalAmount = 0;
 		
-		foreach ($lineItemsAndQtyFromRequestExplode as $lineItemsAndQtyFromRequest) {
-			$lineItemAndQuantity = explode(':', $lineItemsAndQtyFromRequest); 
-			
-			$lineItemId = $lineItemAndQuantity[0]; 
+		foreach ($lineItemCheckboxArr as $key => $lineItemId) {
 			$lineItem = LineItem::where('id', $lineItemId)->first(['unit_price'])->unit_price;
-			$lineItem1 = (number_format($lineItem, 2));
-			$qty = (int)$lineItemAndQuantity[1]; 
-			
+			$lineItemToDecimal = (number_format($lineItem, 2));
 			$sum = $lineItem * $qty; 
 			$totalAmount += $sum;
-			echo "$lineItem1 * $qty = "; 
 		}
 		
         $invoice = Invoice::create([
 		    'invoice_number'     => $invoiceNumber,
             'customer_name'      => $request->customer_name,
 			'customer_email'     => $request->customer_email,
-            'line_items_and_qty' => $request->line_items_and_qty,
+			// id:quantity;id:quantity;id;id:quantity    
+            'line_items_and_qty' => $lineItemsAndQtyToDb, 
 			'user_id'            => auth()->id(),
 			'total_amount'       => $totalAmount,
         ]);
@@ -84,12 +94,12 @@ class InvoiceController extends Controller
 			
 			$lineItemId = $lineItemAndQuantity[0]; 
 			$lineItem = LineItem::where('id', $lineItemId)->first(['unit_price'])->unit_price;
-			$lineItem1 = (number_format($lineItem, 2));
+			$lineItemToDecimal = (number_format($lineItem, 2));
 			$qty = (int)$lineItemAndQuantity[1]; 
 			
 			$sum = $lineItem * $qty; 
 			$totalAmount += $sum;
-			echo "$lineItem1 * $qty = "; 
+			echo "$lineItemToDecimal * $qty = "; 
 			echo (number_format($sum, 2)); echo "<br />";
 		}
 		echo "Total sum is: "; echo $totalAmount; echo "<hr />";

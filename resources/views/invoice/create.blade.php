@@ -6,23 +6,14 @@
                 @csrf
 			
 				@forelse ($lineItems as $lineItem)
-				<?php $j= $lineItem->quantity; ?>
                 <div class="text-dark flex justify-between py-4">
-					<p id="{{$lineItem->id}}" class="line_items_and_qty_class">
-						<input type="checkbox" name="lineItem_id_req" class="{{$lineItem->id}}" value="{{$lineItem->id}}" />
-					    {{ $lineItem->name }} ({{ $lineItem->unit_price }}$)
-						<select name="qty_req" class="{{$lineItem->id}}">
-							<option value="" selected="selected">Quantity</option>
-                            @for ($i = 1; $i <= $j; $i++)
-                                <option value="{{$i}}">
-                                    {{$i}}
-								</option>
-							@endfor
-						</select>
-					</p>
+					<p>
+					    <input type="checkbox" name="line_items[]" value="{{$lineItem->id}}"> 
+						<label>{{$lineItem->name}} ({{$lineItem->name}}$), Quantity is 1</label>
+				    </p>
                 </div>
                 @empty
-                    <p class="text-white">You don't have any line item yet.</p>
+                    <p class="text-dark">You don't have any line item yet.</p>
                 @endforelse
 				
                 <!-- Line Customer Name -->
@@ -36,12 +27,6 @@
                     <x-input-label for="customer_email" :value="__('Customer Email')" />
                     <x-text-input id="customer_email" class="block mt-1 w-full" type="email" name="customer_email" autofocus />
                     <x-input-error :messages="$errors->get('customer_email')" class="mt-2" />
-                </div>
-               
-			    <div class="mt-4">
-                    <x-input-label for="line_items_and_qty" :value="__('Line items and qty')" />
-                    <x-text-input id="line_items_and_qty" class="block mt-1 w-full" type="text" name="line_items_and_qty" autofocus />
-                    <x-input-error :messages="$errors->get('line_items_and_qty')" class="mt-2" />
                 </div>
 
                 <div class="flex items-center justify-end mt-4">
