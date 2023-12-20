@@ -38,32 +38,7 @@ class InvoiceController extends Controller
     {
 		$invoiceNumber = rand(10, 1000);
 		
-		// line item id
-		$lineItemCheckboxArr = $request->input('line_items'); 
-		
-		$arr = [];
-		foreach ($lineItemCheckboxArr as $key => $lineItemId) {
-			$arr[] = $lineItemId; 
-		}
-		
-		// line item default quantity = 1
-		// TODO quantity > 1
-		$lineItemQuantity = 1;
-		$lineItemsAndQtyToDb = "";
-	    $oneLineItemAndQty = implode(':1;', $arr); 
-	    $lineItemsAndQtyToDb .= $oneLineItemAndQty;
-		$lineItemsAndQtyToDb .= ":1";
-
-		$qty = (int)$lineItemQuantity;
-		$sum = 0;
-		$totalAmount = 0;
-		
-		foreach ($lineItemCheckboxArr as $key => $lineItemId) {
-			$lineItem = LineItem::where('id', $lineItemId)->first(['unit_price'])->unit_price;
-			$lineItemToDecimal = (number_format($lineItem, 2));
-			$sum = $lineItem * $qty; 
-			$totalAmount += $sum;
-		}
+		$this->storeOrUpdate($request, $invoice);
 		
         $invoice = Invoice::create([
 		    'invoice_number'     => $invoiceNumber,
@@ -99,10 +74,11 @@ class InvoiceController extends Controller
 			
 			$sum = $lineItem * $qty; 
 			$totalAmount += $sum;
-			echo "$lineItemToDecimal * $qty = "; 
-			echo (number_format($sum, 2)); echo "<br />";
+			//var_dump("$lineItemToDecimal * $qty = "); 
+			//var_dump(number_format($sum, 2)); 
+			//echo "<br />";
 		}
-		echo "Total sum is: "; echo $totalAmount; echo "<hr />";
+		//var_dump("Total sum is: $totalAmount"); 
 		
         return view('invoice.show', compact('invoice'));
     }
@@ -112,7 +88,20 @@ class InvoiceController extends Controller
      */
     public function edit(Invoice $invoice)
     {
-        return view('invoice.edit', compact('invoice'));
+		$id = $invoice['id']; 
+		$lineItemsAndQtyFromDb = Invoice::where('id', $id)->first(['line_items_and_qty'])->line_items_and_qty;
+		$lineItemsAndQtyFromDbExplode = explode(';', $lineItemsAndQtyFromDb); 
+		$lineItemWithCheckboxCkecked;
+		
+		foreach ($lineItemsAndQtyFromDbExplode as $lineItemsAndQtyFromDb) {
+			$lineItemAndQuantity = explode(':', $lineItemsAndQtyFromDb); 
+			$lineItemId = $lineItemAndQuantity[0]; 
+			$lineItemWithCheckboxCkecked = LineItem::where('id', $lineItemId)->get();
+		}
+		
+		$lineItems = LineItem::orderBy('name')->get();
+		
+        return view('invoice.edit', compact('invoice', 'lineItems', 'lineItemWithCheckboxCkecked'));
     }
 
     /**
@@ -120,24 +109,7 @@ class InvoiceController extends Controller
      */
     public function update(UpdateInvoiceRequest $request, Invoice $invoice)
     {
-		$lineItemsAndQtyFromRequest = $request->line_items_and_qty;
-		$lineItemsAndQtyFromRequestExplode = explode(';', $lineItemsAndQtyFromRequest); 
-		$sum = 0;
-		$totalAmount = 0;
-		
-		foreach ($lineItemsAndQtyFromRequestExplode as $lineItemsAndQtyFromRequest) {
-			$lineItemAndQuantity = explode(':', $lineItemsAndQtyFromRequest); 
-			
-			$lineItemId = $lineItemAndQuantity[0]; 
-			$lineItem = LineItem::where('id', $lineItemId)->first(['unit_price'])->unit_price;
-			$lineItem1 = (number_format($lineItem, 2));
-			$qty = (int)$lineItemAndQuantity[1]; 
-			
-			$sum = $lineItem * $qty; 
-			$totalAmount += $sum;
-		}
-		$invoice['total_amount'] = $totalAmount;
-		
+		$this->storeOrUpdate($request, $invoice);
         $invoice->update($request->validated());
 		return redirect(route('invoice.index'));
     }
@@ -149,5 +121,38 @@ class InvoiceController extends Controller
     {
         $invoice->delete();
         return redirect(route('invoice.index'));
+    }
+	
+	protected function storeOrUpdate($request, $invoice)
+    {
+        // line item id
+		$lineItemCheckboxArr = $request->input('line_items'); 
+		
+		$arr = [];
+		foreach ($lineItemCheckboxArr as $key => $lineItemId) {
+			$arr[] = $lineItemId; 
+		}
+		
+		// line item default quantity = 1
+		// TODO quantity > 1
+		$lineItemQuantity = 1;
+		$lineItemsAndQtyToDb = "";
+	    $oneLineItemAndQty = implode(':1;', $arr); 
+	    $lineItemsAndQtyToDb .= $oneLineItemAndQty;
+		$lineItemsAndQtyToDb .= ":1";
+
+		$qty = (int)$lineItemQuantity;
+		$sum = 0;
+		$totalAmount = 0;
+		
+		foreach ($lineItemCheckboxArr as $key => $lineItemId) {
+			$lineItem = LineItem::where('id', $lineItemId)->first(['unit_price'])->unit_price;
+			$lineItemToDecimal = (number_format($lineItem, 2));
+			$sum = $lineItem * $qty; 
+			$totalAmount += $sum;
+		}
+		
+		$invoice['line_items_and_qty'] = $lineItemsAndQtyToDb;
+		$invoice['total_amount'] = $totalAmount;
     }
 }

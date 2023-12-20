@@ -5,6 +5,18 @@
             <form method="POST" action="{{ route('invoice.update', $invoice->id) }}">
                 @csrf
 				@method('patch')
+				
+				@forelse ($lineItems as $lineItem)
+                <div class="text-dark flex justify-between py-4">
+					<p>
+					    <input type="checkbox" name="line_items[]" value="{{$lineItem->id}}" /> 
+						<label>{{$lineItem->name}} ({{$lineItem->unit_price}}$), Quantity is 1</label>
+				    </p>
+                </div>
+                @empty
+                    <p class="text-dark">You don't have any line item yet.</p>
+                @endforelse
+				
                 <!-- Line Customer Name -->
                 <div class="mt-4">
                     <x-input-label for="customer_name" :value="__('Customer Name')" />
@@ -18,13 +30,6 @@
                     <x-text-input id="customer_email" class="block mt-1 w-full" type="email" name="customer_email" autofocus 
 						value="{{ $invoice->customer_email }}" />
                     <x-input-error :messages="$errors->get('customer_email')" class="mt-2" />
-                </div>
-               
-			    <div class="mt-4">
-                    <x-input-label for="line_items_and_qty" :value="__('Line items and qty')" />
-                    <x-text-input id="line_items_and_qty" class="block mt-1 w-full" type="text" name="line_items_and_qty" autofocus 
-						value="{{ $invoice->line_items_and_qty }}" />
-                    <x-input-error :messages="$errors->get('line_items_and_qty')" class="mt-2" />
                 </div>
 
                 <div class="flex items-center justify-end mt-4">

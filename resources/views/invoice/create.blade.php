@@ -9,7 +9,7 @@
                 <div class="text-dark flex justify-between py-4">
 					<p>
 					    <input type="checkbox" name="line_items[]" value="{{$lineItem->id}}"> 
-						<label>{{$lineItem->name}} ({{$lineItem->name}}$), Quantity is 1</label>
+						<label>{{$lineItem->name}} ({{$lineItem->unit_price}}$), Quantity is 1</label>
 				    </p>
                 </div>
                 @empty

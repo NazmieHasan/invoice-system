@@ -25,7 +25,6 @@ class UpdateInvoiceRequest extends FormRequest
         return [
             'customer_name'      => ['required', 'string', 'max:255'],
             'customer_email'     => ['required', 'string', 'lowercase', 'email', 'max:255'],
-            'line_items_and_qty' => ['required', 'string', 'max:255'],
         ];
     }
 }
