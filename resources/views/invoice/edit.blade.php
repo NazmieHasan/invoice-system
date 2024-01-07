@@ -9,7 +9,13 @@
 				@forelse ($lineItems as $lineItem)
                 <div class="text-dark flex justify-between py-4">
 					<p>
-					    <input type="checkbox" name="line_items[]" value="{{$lineItem->id}}" /> 
+					    <input type="checkbox" name="line_items[]" value="{{$lineItem->id}}" 
+							@foreach ($lineItemWithCheckboxChecked as $lineItemChecked)
+								@if ($lineItem->id == $lineItemChecked)
+									checked
+								@endif
+							@endforeach
+						/> 
 						<label>{{$lineItem->name}} ({{$lineItem->unit_price}}$), Quantity is 1</label>
 				    </p>
                 </div>

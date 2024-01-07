@@ -38,7 +38,35 @@ class InvoiceController extends Controller
     {
 		$invoiceNumber = rand(10, 1000);
 		
-		$this->storeOrUpdate($request, $invoice);
+		// line item id
+		$lineItemCheckboxArr = $request->input('line_items'); 
+		
+		$arr = [];
+		foreach ($lineItemCheckboxArr as $key => $lineItemId) {
+			$arr[] = $lineItemId; 
+		}
+		
+		// line item default quantity = 1
+		// TODO quantity > 1
+		$lineItemQuantity = 1;
+		$lineItemsAndQtyToDb = "";
+	    $oneLineItemAndQty = implode(':1;', $arr); 
+	    $lineItemsAndQtyToDb .= $oneLineItemAndQty;
+		$lineItemsAndQtyToDb .= ":1";
+
+		$qty = (int)$lineItemQuantity;
+		$sum = 0;
+		$totalAmount = 0;
+		
+		foreach ($lineItemCheckboxArr as $key => $lineItemId) {
+			$lineItem = LineItem::where('id', $lineItemId)->first(['unit_price'])->unit_price;
+			
+			// TODO decrease quantity, if line_item added in invoice
+			
+			$lineItemToDecimal = (number_format($lineItem, 2));
+			$sum = $lineItem * $qty; 
+			$totalAmount += $sum;
+		}
 		
         $invoice = Invoice::create([
 		    'invoice_number'     => $invoiceNumber,
@@ -62,25 +90,25 @@ class InvoiceController extends Controller
 		$lineItemsAndQtyFromDb = Invoice::where('id', $id)->first(['line_items_and_qty'])->line_items_and_qty;
 		$lineItemsAndQtyFromDbExplode = explode(';', $lineItemsAndQtyFromDb); 
 		$sum = 0;
-		$totalAmount = 0;
+		$lineItemInInvoice = null;
+		$allLineItemInInvoice = [];
 		
 		foreach ($lineItemsAndQtyFromDbExplode as $lineItemsAndQtyFromDb) {
 			$lineItemAndQuantity = explode(':', $lineItemsAndQtyFromDb); 
 			
 			$lineItemId = $lineItemAndQuantity[0]; 
-			$lineItem = LineItem::where('id', $lineItemId)->first(['unit_price'])->unit_price;
-			$lineItemToDecimal = (number_format($lineItem, 2));
+			$lineItemName = LineItem::where('id', $lineItemId)->first(['name'])->name;
+			$lineItemPrice = LineItem::where('id', $lineItemId)->first(['unit_price'])->unit_price;
+			$lineItemPriceToDecimal = (number_format($lineItemPrice, 2));
 			$qty = (int)$lineItemAndQuantity[1]; 
 			
-			$sum = $lineItem * $qty; 
-			$totalAmount += $sum;
-			//var_dump("$lineItemToDecimal * $qty = "); 
-			//var_dump(number_format($sum, 2)); 
-			//echo "<br />";
+			$sum = $lineItemPrice * $qty; 
+			$sumToDecimal = (number_format($sum, 2));
+			$lineItemInInvoice = "$lineItemName: $lineItemPriceToDecimal$ * $qty = $sumToDecimal"; 
+			$allLineItemInInvoice[] = $lineItemInInvoice;
 		}
-		//var_dump("Total sum is: $totalAmount"); 
 		
-        return view('invoice.show', compact('invoice'));
+        return view('invoice.show', compact('invoice', 'allLineItemInInvoice'));
     }
 
     /**
@@ -91,17 +119,16 @@ class InvoiceController extends Controller
 		$id = $invoice['id']; 
 		$lineItemsAndQtyFromDb = Invoice::where('id', $id)->first(['line_items_and_qty'])->line_items_and_qty;
 		$lineItemsAndQtyFromDbExplode = explode(';', $lineItemsAndQtyFromDb); 
-		$lineItemWithCheckboxCkecked;
+		$lineItemWithCheckboxChecked = [];
 		
 		foreach ($lineItemsAndQtyFromDbExplode as $lineItemsAndQtyFromDb) {
 			$lineItemAndQuantity = explode(':', $lineItemsAndQtyFromDb); 
 			$lineItemId = $lineItemAndQuantity[0]; 
-			$lineItemWithCheckboxCkecked = LineItem::where('id', $lineItemId)->get();
+			$lineItemWithCheckboxChecked[] = LineItem::where('id', $lineItemId)->first(['id'])->id;
 		}
 		
-		$lineItems = LineItem::orderBy('name')->get();
-		
-        return view('invoice.edit', compact('invoice', 'lineItems', 'lineItemWithCheckboxCkecked'));
+		$lineItems = LineItem::orderBy('name')->get(); 
+        return view('invoice.edit', compact('invoice', 'lineItems', 'lineItemWithCheckboxChecked'));
     }
 
     /**
@@ -109,7 +136,7 @@ class InvoiceController extends Controller
      */
     public function update(UpdateInvoiceRequest $request, Invoice $invoice)
     {
-		$this->storeOrUpdate($request, $invoice);
+		$this->funcUpdate($request, $invoice);
         $invoice->update($request->validated());
 		return redirect(route('invoice.index'));
     }
@@ -123,7 +150,7 @@ class InvoiceController extends Controller
         return redirect(route('invoice.index'));
     }
 	
-	protected function storeOrUpdate($request, $invoice)
+	protected function funcUpdate($request, $invoice)
     {
         // line item id
 		$lineItemCheckboxArr = $request->input('line_items'); 
